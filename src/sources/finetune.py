@@ -13,46 +13,6 @@ from transformers import (
     DataCollatorForSeq2Seq,
 )
 
-class M2Parser:
-    @staticmethod
-    def parse_m2_file(filename: str) -> List[Dict]:
-        data, source, edits = [], None, []
-        with open(filename, encoding="utf-8") as f:
-            for ln in f:
-                ln = ln.rstrip("\n")
-                if ln.startswith("S "):
-                    if source is not None and edits:
-                        data.append({"source": source, "corrections": edits})
-                    source, edits = ln[2:], []
-                elif ln.startswith("A ") and source is not None:
-                    parts = ln[2:].split("|||")
-                    st, en = map(int, parts[0].split()[:2])
-                    corr = parts[2]
-                    if corr != "-NONE-":
-                        edits.append({
-                            "start_idx": st,
-                            "end_idx":   en,
-                            "correction": corr
-                        })
-                elif ln == "" and source is not None:
-                    if edits:
-                        data.append({"source": source, "corrections": edits})
-                    source, edits = None, []
-        if source is not None and edits:
-            data.append({"source": source, "corrections": edits})
-        return data
-
-    @staticmethod
-    def apply_corrections(src: str, edits: List[Dict]) -> str:
-        toks = src.split()
-        for e in sorted(edits, key=lambda x: x["start_idx"], reverse=True):
-            s, t = e["start_idx"], e["end_idx"]
-            del toks[s:t]
-            corr_toks = e["correction"].split()
-            for i, tok in enumerate(corr_toks):
-                toks.insert(s + i, tok)
-        return " ".join(toks)
-
 
 def load_split(path: Path, prefix: str, dev_ratio: float = 0.05) -> Dataset:
     """
