@@ -27,22 +27,22 @@ def formatting_prompt(sample):
     question = sample['question']
     ddls = sample['simplified_ddl']
     db = sample['db']
-    # 动态加载前三行数据
+
     simplified_ddl_data = []
-    # 读取数据库
+
     mydb = sqlite3.connect(
         fr"data/spider/test_database/{db}/{db}.sqlite")  # 链接数据库
     cur = mydb.cursor()
-    # 表
+
     cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
     Tables = cur.fetchall()  # Tables 为元组列表
     for table in Tables:
-        # 列
+
         cur.execute(f"select * from `{table[0]}`")
         col_name_list = [tuple[0] for tuple in cur.description]
         # print(col_name_list)
         db_data_all = []
-        # 获取前三行数据
+
         for i in range(3):
             db_data_all.append(cur.fetchone())
         # ddls_data
@@ -216,10 +216,10 @@ def run_sql_generation(model,
 
 if __name__ == '__main__':
 
-    # 创建 ArgumentParser 对象
+
     parser = argparse.ArgumentParser()
 
-    # 添加命令行选项
+
     parser.add_argument("--model", type=str, default="puyuapi")
     parser.add_argument("--dataset", type=str, default="ppl_dev.json")
     parser.add_argument("--out_file", type=str, default="raw.txt")
@@ -227,7 +227,7 @@ if __name__ == '__main__':
     parser.add_argument("--pool", type=int, default=1)
     parser.add_argument("--sl", action="store_true")
     parser.add_argument("--select_type", type=str, default="Euclidean_mask")
-    # 解析命令行参数
+
     args = parser.parse_args()
     log_file_path = os.path.dirname(
         __file__) + f"/logs/{args.model}_{args.select_type}.log"
